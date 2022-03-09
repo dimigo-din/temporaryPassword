@@ -37,8 +37,15 @@ const Fields = styled('input', {
   borderRadius: '10px',
   textAlign: 'center',
   fontFamily: 'Pretendard Variable',
+  transition: 'all 0.3s ease',
   '&::placeholder': {
     color: '#D2D6DB'
+  },
+  '&:focus, &:hover': {
+    border: '2px solid rgb(175 175 175)'
+  },
+  '&.err': {
+    border: '2px solid #E83C77'
   }
 });
 const SubmitBtn = styled('input', {
@@ -61,23 +68,35 @@ const App = () => {
   const [password, setPassword] = useState<string>("");
   const [confirm, setConfirm] = useState<string>("");
 
+  const [isErr, setIsErr] = useState<boolean>(false);
+
   const setTmpPwd = (e: any) => {
     e.preventDefault();
 
-    if(!id || !code || !password) return toast.error("필드를 확인해주세요.");
+    if(!id || !code || !password) {
+      setIsErr(true);
+      return toast.error("필드를 확인해주세요.");
+    }
+    if(password !== confirm) {
+      setIsErr(true);
+      return toast.error("비밀번호를 확인해주세요.");
+    }
 
-    api.post('/auth/setPwd', {
-      Headers: {
+    api.post('/auth/setPwd', {id, code, password}, {
+      headers: {
         'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        id,
-        code,
-        password
-      })
+      }
     })
-    .then(data => {
-      toast.success(data.data.message);
+    .then(res => {
+      if(res.status === 200) return toast.success(res.data.message);
+      if(res.data.message) return toast.error(res.data.message);
+      return toast.error("서버에서 에러가 발생했어요.\n나중에 다시 시도해주세요.");
+    })
+    .catch(err => {
+      setIsErr(true);
+      if(err.response.data.message) toast.error(err.response.data.message);
+      else toast.error("서버에서 에러가 발생했어요.\n나중에 다시 시도해주세요.");
+      return Promise.reject(err);
     });
   }
 
@@ -90,22 +109,26 @@ const App = () => {
         type='text'
         placeholder='아이디'
         value={id}
-        onChange={({ target: { value } }) => {setId(value);}} />
+        onChange={({ target: { value } }) => {setId(value);}}
+        className={isErr ? 'err' : ''} />
         <Fields
         type='text'
         placeholder='인증코드'
         value={code}
-        onChange={({ target: { value } }) => {setCode(value);}} />
+        onChange={({ target: { value } }) => {setCode(value);}}
+        className={isErr ? 'err' : ''} />
         <Fields
         type='password'
         placeholder='임시 비밀번호 생성'
         value={password}
-        onChange={({ target: { value } }) => {setPassword(value);}} />
+        onChange={({ target: { value } }) => {setPassword(value);}}
+        className={isErr ? 'err' : ''} />
         <Fields
         type='password'
         placeholder='비밀번호 확인'
         value={confirm}
-        onChange={({ target: { value } }) => {setConfirm(value);}} />
+        onChange={({ target: { value } }) => {setConfirm(value);}}
+        className={isErr ? 'err' : ''} />
         <SubmitBtn
         type="submit"
         value="설정" />
