@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { styled } from '@stitches/react';
 import inlogo from './inlogo.svg';
 import { ToastContainer, toast } from 'react-toastify';
+import { useMediaQuery } from 'react-responsive';
 
 import './pretendardvariable.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,12 +17,20 @@ const Container = styled('div', {
   alignItems: 'center'
 });
 const Box = styled('form', {
-  width: '33.3%',
   height: '60%',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-evenly',
-  alignItems: 'center'
+  alignItems: 'center',
+  '&.pc': {
+    width: '33.3%',
+  },
+  '&.tablet': {
+    width: '60%',
+  },
+  '&.mobile': {
+    width: '90%',
+  }
 });
 const Logo = styled('img', {
   width: '60px',
@@ -70,6 +79,10 @@ const App = () => {
 
   const [isErr, setIsErr] = useState<boolean>(false);
 
+  const isMobile = useMediaQuery({ query: '(max-width: 600px)' });
+  const isTablet = useMediaQuery({ query: '(min-width: 601px) and (max-width: 992px)' });
+  const isDesktop = useMediaQuery({ query: '(min-width: 993px)' });
+
   const setTmpPwd = (e: any) => {
     e.preventDefault();
 
@@ -103,7 +116,7 @@ const App = () => {
   return (
     <Container>
       <ToastContainer />
-      <Box onSubmit={setTmpPwd}>
+      <Box onSubmit={setTmpPwd} className={isMobile ? 'mobile' : isTablet ? 'tablet' : isDesktop ? 'pc' : ''}>
         <Logo src={inlogo} />
         <Fields
         type='text'
