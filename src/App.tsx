@@ -101,9 +101,13 @@ const App = () => {
       }
     })
     .then(res => {
-      if(res.status === 200) return toast.success(res.data.message);
-      if(res.data.message) return toast.error(res.data.message);
-      return toast.error("서버에서 에러가 발생했어요.\n나중에 다시 시도해주세요.");
+      if(res.status === 200) {
+        toast.success(res.data.message);
+        setTimeout(() => {
+          window.location.replace('https://dimigo.in');
+        }, 2000);
+      } else if(res.data.message) return toast.error(res.data.message);
+      else return toast.error("서버에서 에러가 발생했어요.\n나중에 다시 시도해주세요.");
     })
     .catch(err => {
       setIsErr(true);
